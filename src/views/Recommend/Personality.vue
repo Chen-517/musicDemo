@@ -171,6 +171,7 @@ export default {
     flex-wrap: wrap;
     justify-content: space-between;
     padding: 20px 0 0 0;
+    cursor: pointer;
 
     .fast {
       margin-bottom: 15px;
@@ -180,6 +181,7 @@ export default {
       height: 230px;
       overflow: hidden;
       border-radius: 5px;
+      cursor: pointer;
 
       img {
         width: 100%;
@@ -243,6 +245,7 @@ export default {
   .content .fast {
     width: 335px;
     height: 240px;
+    cursor: pointer;
 
     img {
       width: 100%;
@@ -283,6 +286,7 @@ export default {
       overflow: hidden;
       background: transparent;
       transition: all .3s;
+      cursor: pointer;
 
       &:hover {
         background: rgba(0, 0, 0, 0.1);
