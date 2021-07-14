@@ -15,13 +15,6 @@ export function classGet(url,params) {
     })
 }
 
-export function selectedGet(url,params) {
-    return request({
-        url,
-        method: "get",  //请求方式
-        params
-    })
-}
 export function PaidSelectionGet(url,params) {
     return request({
         url,
@@ -31,6 +24,14 @@ export function PaidSelectionGet(url,params) {
 }
 
 export function recommendGet(url,params) {
+    return request({
+        url,
+        method: "get",  //请求方式
+        params
+    })
+}
+
+export function completeGet(url,params) {
     return request({
         url,
         method: "get",  //请求方式

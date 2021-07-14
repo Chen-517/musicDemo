@@ -13,12 +13,10 @@
     <!--  主播电台的分类  -->
     <div class="class">
       <div v-for="(item,index) in classData" :key="index" class="radioStation-class">
-        <img :src="item.pic56x56Url" alt="" >
+        <img :src="item.pic56x56Url" alt="">
         <p>{{ item.name }}</p>
       </div>
     </div>
-
-    <!--  精选电台  -->
 
     <!--  付费精选  -->
     <div class="money">
@@ -30,49 +28,54 @@
           <div class="text">
             <p>{{ item.name }}</p>
             <p>{{ item.rcmdText }}</p>
-            <p>￥<span>39.9</span></p>
+            <p>￥<span>{{ item.originalPrice / 100 }}</span></p>
           </div>
         </div>
       </div>
     </div>
 
     <!--  个性电台推荐  -->
-    <div class="recommend">
-      <h3>个性电台</h3><span>更多></span>
-      <hr>
-      <div>
-        <div v-for="(item,index) in recommendData" class="content">
-          <img :src="item.picUrl" alt="" loading="lazy">
-          <div class="text">
-            <p>{{ item.name }}</p>
-            <p>{{ item.copywriter }}</p>
-          </div>
-        </div>
-      </div>
+    <RadioStationCare :reads="recommendData" name="个性电台推荐"></RadioStationCare>
+    <RadioStationCare :reads="coverUp" name="翻唱"></RadioStationCare>
+    <RadioStationCare :reads="electronic3D" name="电子3D"></RadioStationCare>
+    <RadioStationCare :reads="musicStory" name="音乐故事"></RadioStationCare>
+    <RadioStationCare :reads="emotionalFrequencyModulation" name="情感调频"></RadioStationCare>
+    <RadioStationCare :reads="quadraticElement" name="二次元"></RadioStationCare>
 
-    </div>
+    <Load v-if="loadOK"></Load>
   </div>
 </template>
 
 <script>
-import {classGet, PaidSelectionGet, recommendGet, selectedGet, slideGet} from '../../api/radioStation'
+import {classGet, completeGet, PaidSelectionGet, recommendGet, slideGet} from '../../api/radioStation'
+import RadioStationCare from "../../components/RadioStationCare";
+import Load from "../../components/Load";
 
 export default {
   name: "RadioStation",
+  components: {Load, RadioStationCare},
   data() {
     return {
       slideData: [],
       classData: [],
       PaidSelectionData: [],
-      recommendData: []
+      recommendData: [],
+      coverUp: [],//翻唱
+      electronic3D: [],//电子3D
+      musicStory: [],//音乐故事
+      emotionalFrequencyModulation: [],//情感调频
+      quadraticElement: [],//二次元
+      loadOK: true
     }
   },
   methods: {
 
     //获取主播电台的幻灯片
     slideGetData() {
+      this.loadOK = true
       slideGet('dj/banner').then(res => {
         this.slideData = res.data
+        this.loadOK = false
       }).catch(err => {
         console.log(err)
       })
@@ -80,21 +83,21 @@ export default {
 
     //分类
     classGetData() {
+      this.loadOK = true
       classGet('dj/catelist').then(res => {
         this.classData = res.categories
+        this.loadOK = false
       }).catch(err => {
         console.log(err);
       })
     },
 
-    selectedGetData() {
-      selectedGet('')
-    },
-
     //付费精选
     PaidSelectionGetData() {
+      this.loadOK = true
       PaidSelectionGet("/dj/paygift", {limit: 4}).then(res => {
         this.PaidSelectionData = res.data.list
+        this.loadOK = false
       }).catch(err => {
         console.log(err);
       })
@@ -103,12 +106,59 @@ export default {
 
     //  电台个性推荐
     recommendGetData() {
+      this.loadOK = true
       recommendGet('/dj/recommend').then(res => {
         this.recommendData = res.djRadios
-        console.log(this.recommendData)
+        this.loadOK = false
       }).catch(err => {
         console.log(err);
       })
+    },
+
+    completeGetData() {
+      this.loadOK = true
+      //翻唱
+      completeGet('/dj/recommend/type', {
+        type: 2001
+      }).then(res => {
+        this.coverUp = res.djRadios
+      }).catch(err => {
+        console.log(err);
+      })
+      //电子3d
+      completeGet('/dj/recommend/type', {
+        type: 10002
+      }).then(res => {
+        this.electronic3D = res.djRadios
+      }).catch(err => {
+        console.log(err);
+      })
+//音乐故事
+      completeGet('/dj/recommend/type', {
+        type: 2
+      }).then(res => {
+        this.musicStory = res.djRadios
+      }).catch(err => {
+        console.log(err);
+      })
+      //情感调频
+      completeGet('/dj/recommend/type', {
+        type: 3
+      }).then(res => {
+        this.emotionalFrequencyModulation = res.djRadios
+      }).catch(err => {
+        console.log(err);
+      })
+      //二次元
+      completeGet('/dj/recommend/type', {
+        type: 3001
+      }).then(res => {
+        this.quadraticElement = res.djRadios
+        this.loadOK = false
+      }).catch(err => {
+        console.log(err);
+      })
+
     }
   },
   created() {
@@ -117,6 +167,7 @@ export default {
     this.classGetData()
     this.PaidSelectionGetData()
     this.recommendGetData()
+    this.completeGetData()
   }
 }
 </script>
@@ -241,6 +292,12 @@ export default {
         position: relative;
         overflow: hidden;
         text-overflow: ellipsis;
+
+        p {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
 
         p:nth-child(1) {
           position: absolute;
