@@ -47,6 +47,10 @@ export default {
     for (let i = 0; i < this.tabsList.length; i++) {
       arr.push(this.tabsList[i].url)
     }
+    if (flag == "/recommend/newMusic/new" || flag == "/recommend/newMusic/dis") {
+      flag = "/recommend/newMusic"
+    }
+
     this.active = arr.indexOf(flag)
 
   }
@@ -66,7 +70,6 @@ export default {
   }
 
   .recommend {
-    height: 700px;
     background: #ffff;
     padding: 0 80px;
   }

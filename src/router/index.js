@@ -9,6 +9,11 @@ const routes = [
         redirect: '/recommend/personality',  //重定向  主页的热门推荐
     },
     {
+        path: '/recommend/newMusic',
+        redirect: '/recommend/newMusic/new',
+    },
+    ,
+    {
         path: '/content',
         name: 'Content',
         component: () => import('../views/Content')
@@ -37,6 +42,16 @@ const routes = [
             }, {
                 path: "/recommend/newMusic",
                 component: () => import( '../views/Recommend/NewMusic'),
+                children: [
+                    {
+                        path: "/recommend/newMusic/new",
+                        component: () => import( '../components/NewMusicSon/NewMusic'),
+                    },
+                    {
+                        path: "/recommend/newMusic/dis",
+                        component: () => import( '../components/NewMusicSon/NewDis'),
+                    }
+                ]
             }
         ]
     }

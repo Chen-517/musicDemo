@@ -24,10 +24,14 @@
           <!--    顶部固定播放量      -->
           <div class="topTitle">
             <i class="el-icon-headset"></i>
-            <span>{{ item.playCount >= 10000 ? (parseInt(item.playCount / 10000)) + '万' : item.playCount }}</span>
+            <span>{{
+                item.playCount >= 100000000
+                    ? (item.playCount / 100000000).toFixed(2) + "亿"
+                    : parseInt(item.playCount / 10000) + "万"
+              }}</span>
           </div>
           <!-- 热歌图片 -->
-          <img :src="item.coverImgUrl" alt="">
+          <img :src="item.coverImgUrl" alt="" loading="lazy">
           <!--    描述      -->
           <p class="describe">{{ item.name }}</p>
           <!--    右边进来播放按钮      -->
@@ -71,27 +75,33 @@
       </div>
     </div>
 
+    <Load v-if="loadOK"></Load>
   </div>
 </template>
 
 <script>
 import {getSlidePhoto, recommendedPlayGet, ExclusiveBroadcastGet, NewMusicDataGet} from '../../api/personalityData'
+import Load from "../../components/Load";
 
 export default {
   name: "Personality",
+  components: {Load},
   data() {
     return {
       PhotoArr: [],
       songArr: [],
       ExclusiveBroadcastArr: [],
-      NewMusicDataGetArr: []
+      NewMusicDataGetArr: [],
+      loadOK: true
     }
   },
   methods: {
     //请求轮播图的照片
     requestPhoto() {
+      this.loadOK = true
       getSlidePhoto('/banner').then(res => {
         this.PhotoArr = res.banners;
+        this.loadOK = false
       }).catch(err => {
         console.log(err)
       })
@@ -99,25 +109,31 @@ export default {
 
     //请求推荐歌单的数据
     getRecommendedData() {
+      this.loadOK = true
       //limit限制个数(接口有写)
       recommendedPlayGet('/top/playlist', {limit: 10}).then(res => {
         this.songArr = res.playlists;
+        this.loadOK = false
       }).catch(err => {
         console.log(err)
       })
     },
 
     ExclusiveBroadcast() {
+      this.loadOK = true
       ExclusiveBroadcastGet('/personalized/privatecontent', {limit: 3}).then(res => {
         this.ExclusiveBroadcastArr = res.result
+        this.loadOK = false
       }).catch(err => {
         console.log(err)
       })
     },
 
     NewMusicData() {
+      this.loadOK = true
       NewMusicDataGet('/personalized/newsong', {limit: 12}).then(res => {
         this.NewMusicDataGetArr = res.result
+        this.loadOK = false
       }).catch(err => {
         console.log(err)
       })
@@ -126,10 +142,12 @@ export default {
 
   },
   created() {
+
     this.requestPhoto()
     this.getRecommendedData()
     this.ExclusiveBroadcast()
     this.NewMusicData()
+
   }
 }
 </script>

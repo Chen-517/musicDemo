@@ -11,10 +11,14 @@
         <!--    顶部固定播放量      -->
         <div class="topTitle">
           <i class="el-icon-headset"></i>
-          <span>{{ item.playCount >= 10000 ? (parseInt(item.playCount / 10000)) + '万' : item.playCount }}</span>
+          <span>{{
+              item.playCount >= 100000000
+                  ? (item.playCount / 100000000).toFixed(2) + "亿"
+                  : parseInt(item.playCount / 10000) + "万"
+            }}</span>
         </div>
         <!-- 热歌图片 -->
-        <img :src="item.coverImgUrl" alt="">
+        <img :src="item.coverImgUrl" alt="" loading="lazy">
         <!--    描述      -->
         <p class="describe">{{ item.name }}</p>
         <!--    作者    -->
@@ -35,15 +39,19 @@
       </div>
     </div>
 
+    <Load v-if="loadOK"></Load>
   </div>
 </template>
 
 <script>
 import {classification, classificationList} from "../../api/songsterData"
+import Load from "../../components/Load";
 
 export default {
   name: "Songster"
-  , data() {
+  ,
+  components: {Load},
+  data() {
     return {
       list: [],
       playlists: [],
@@ -51,7 +59,8 @@ export default {
       palyAll: '',
       cats: '',
       limit: 30,
-      currentPages: 1  //当前页
+      currentPages: 1,  //当前页
+      loadOK: true
     }
   }
   , methods: {
@@ -85,14 +94,17 @@ export default {
 
     //分类
     classificationGet() {
+      this.loadOK = true
       classification('/playlist/hot').then(res => {
         this.list = res.tags
+        this.loadOK = false
       }).catch(err => {
         console.log(err);
       })
     },
     //分类歌单获取
     classificationGetlist() {
+      this.loadOK = true
       classificationList('/top/playlist', {
         limit: this.limit,
         offset: this.currentPages,
@@ -100,6 +112,7 @@ export default {
       }).then(res => {
         this.playlists = res.playlists;
         this.palyAll = res;
+        this.loadOK = false
       }).catch(err => {
         console.log(err);
       })
@@ -110,9 +123,9 @@ export default {
 
 
   , created() {
+
     this.classificationGet()
     this.classificationGetlist()
-
   }
 }
 </script>
