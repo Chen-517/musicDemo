@@ -64,7 +64,7 @@
       <hr>
 
       <div class="content">
-        <div v-for="item in NewMusicDataGetArr" class="fast">
+        <div v-for="(item,index) in NewMusicDataGetArr" :key="index" class="fast" @click="musicIdGet(item.id)">
           <img :src="item.picUrl" alt="">
           <div class="text">
             <div class="title">{{ item.name }}</div>
@@ -82,6 +82,8 @@
 <script>
 import {getSlidePhoto, recommendedPlayGet, ExclusiveBroadcastGet, NewMusicDataGet} from '../../api/personalityData'
 import Load from "../../components/Load";
+import {songAddress, songDetails} from "../../api/songDetails";
+import {mapState, mapMutations} from "vuex/dist/vuex.mjs";
 
 export default {
   name: "Personality",
@@ -92,10 +94,45 @@ export default {
       songArr: [],
       ExclusiveBroadcastArr: [],
       NewMusicDataGetArr: [],
-      loadOK: true
+      loadOK: true,
+      Mp3old: ''
     }
   },
+  computed: {
+    ...mapState(['information', 'Mp3', 'taste'])
+  }
+  ,
   methods: {
+    //修改vuex中的数据
+    ...mapMutations(['musicPhotoData', 'musicMusicName', 'musicNameData', 'musicMp3', 'MusicTimeData']),
+    async musicIdGet(id) {
+      this.loadOK = true
+
+      //赋值上次的Mp3的值
+      this.Mp3old = this.Mp3
+      let float = null;
+
+      await songAddress('song/url', {id}).then(res => {
+        this.musicMp3(res.data[0].url)
+      }).catch(err => {
+        console.log(err);
+      })
+
+      //检测是不是2次相同
+      float = this.Mp3old === this.Mp3;
+
+      songDetails('song/detail', {ids: id}).then(res => {
+        this.musicPhotoData(res.songs[0].al.picUrl)
+        this.musicMusicName(res.songs[0].name)
+        this.musicNameData(res.songs[0].ar[0].name)
+        this.MusicTimeData(res.songs[0].dt)
+      }).catch(err => {
+        console.log(err);
+      })
+
+      this.$store.commit('musicTaste', float)
+      this.loadOK = false
+    },
     //请求轮播图的照片
     requestPhoto() {
       this.loadOK = true
@@ -141,6 +178,7 @@ export default {
 
 
   },
+
   created() {
 
     this.requestPhoto()
@@ -297,6 +335,13 @@ export default {
         margin-left: 10px;
         margin-top: 5px;
         line-height: 25px;
+
+        > div {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          width: 200px;
+        }
 
         .name {
           color: #bfbfbf;

@@ -12,11 +12,21 @@ const routes = [
         path: '/recommend/newMusic',
         redirect: '/recommend/newMusic/new',
     },
-    ,
     {
         path: '/content',
         name: 'Content',
-        component: () => import('../views/Content')
+        redirect: '/content/list',
+        component: () => import('../views/Content'),
+        children: [{
+            path: "/content/list",
+            component: () => import( '../components/ContentSon/List'),
+        },{
+            path: "/content/comment",
+            component: () => import( '../components/ContentSon/Comment'),
+        },{
+            path: "/content/collection",
+            component: () => import( '../components/ContentSon/Collection'),
+        }]
     },
     {
         path: '/recommend',

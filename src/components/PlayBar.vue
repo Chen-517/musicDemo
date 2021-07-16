@@ -2,29 +2,29 @@
   <div id="PlayBar">
     <!-- 进度条 -->
     <div class="progress">
-      <a-slider v-model="time" :tooltip-visible="false"/>
+      <a-slider v-model="time" :max="max" @change="jump"/>
     </div>
     <!--  letterbox 信息  -->
     <div class="letterbox">
-      <img alt="" src="../assets/image/bj/bg.jpg">
+      <img :src="information.musicPhoto" alt="">
       <div class="text">
-        <p class="title">九万字 (片段)</p>
-        <p class="name">妖娆</p>
-        <div class="time">04:13 / 00:01</div>
+        <p class="title">{{ information.musicName }}</p>
+        <p class="name">{{ information.name }}</p>
+        <div class="time">{{ information.MusicTime | time }} / <span>{{ currentTime | time }}</span></div>
       </div>
     </div>
 
     <!--  播放  -->
     <div class="pally">
-      <div class="left">
+      <div class="left" @click="backAndForward('back')">
         <a-icon type="step-backward"/>
       </div>
 
-      <div class="suspend-pally" @click="pally(current)">
-        <a-icon :type="current"/>
+      <div class="suspend-pally" @click="pally(taste)">
+        <a-icon :type="taste"/>
       </div>
 
-      <div class="right">
+      <div class="right" @click="backAndForward('forward')">
         <a-icon type="step-forward"/>
       </div>
     </div>
@@ -46,31 +46,70 @@
         <a-icon type="profile"/>
       </div>
     </div>
+    <audio
+        id="audio"
+        ref="audio"
+        :src="Mp3"
+        autoplay
+        @timeupdate="progress"
+    >
+    </audio>
   </div>
 </template>
 
 <script>
+import {mapState} from "vuex/dist/vuex.mjs";
+
 export default {
   name: "PlayBar",
   data() {
     return {
-      type: ["play-circle", "pause-circle"],
-      current: '',
       colors: false,
       filled: 'outlined',
-      time: '0'
+      time: 0,
+      currentTime: 0,
+      max: 0 //进度条的最大值
     }
   },
   methods: {
+    //进度
+    progress() {
+      const audio = this.$refs.audio
+      this.currentTime = audio.currentTime * 1000
+      this.time = this.currentTime / 1000
+      this.max = this.information.MusicTime / 1000
+
+    }
+    ,
     //是暂停还是播放
     pally(state) {
+      const audio = this.$refs.audio
       //传入当前值
+      if (this.information.MusicTime === 0) return
+      this.$store.commit('musicTaste')
       if (state === 'play-circle') {
-        //说明是暂停状态
-        this.current = this.type[1]
+        //说明是暂停状态,切换为播放
+        audio.play()
         return
       }
-      this.current = this.type[0]
+      audio.pause()
+    },
+
+    //快进或者后退 5s
+    backAndForward(name) {
+      const audio = this.$refs.audio
+      if (name === "back") {
+        audio.currentTime -= 5
+        return
+      }
+      audio.currentTime += 5
+
+    }
+    ,
+
+    jump(value) {
+      const audio = this.$refs.audio
+      audio.currentTime = value
     },
 
     //收藏的变化
@@ -80,9 +119,27 @@ export default {
     }
 
   },
-  created() {
-    this.current = this.type[0]
 
+  computed: {
+    ...mapState(['information', 'Mp3', 'taste'])
+  },
+
+  filters: {
+    time: function (val) {
+      let date = new Date(val);
+      let y = date.getFullYear();
+      let m = date.getMonth() + 1;
+      m = m < 10 ? ('0' + m) : m;
+      let d = date.getDate();
+      d = d < 10 ? ('0' + d) : d;
+      let h = date.getHours();
+      h = h < 10 ? ('0' + h) : h;
+      let minute = date.getMinutes();
+      let second = date.getSeconds();
+      minute = minute < 10 ? ('0' + minute) : minute;
+      second = second < 10 ? ('0' + second) : second;
+      return minute + ':' + second;
+    }
   }
 }
 </script>
@@ -125,7 +182,8 @@ export default {
         margin-top: 5px;
       }
 
-      .time{
+      .time {
+        width: 150px;
         letter-spacing: 1.5px;
       }
 
@@ -176,6 +234,7 @@ export default {
     font-size: 20px;
     height: 100%;
     line-height: 60px;
+
 
     > div {
       margin-right: 20px;
